@@ -33,7 +33,9 @@ CSRF_TRUSTED_ORIGINS = [ 'https://*' ]
 
 # Application definition
 
-INSTALLED_APPS = [
+SHARED_APPS = [
+    'django_tenants',
+    'a_tenant_manager',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -54,9 +56,32 @@ INSTALLED_APPS = [
     'django_browser_reload',
 ]
 
+TENANT_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+
+    # My apps
+    'a_home',
+    'a_users',
+]
+
+
+INSTALLED_APPS = SHARED_APPS + [
+    app for app in TENANT_APPS if app not in SHARED_APPS
+]
+
+
 SITE_ID = 1
 
 MIDDLEWARE = [
+    'django_tenants.middleware.main.TenantMainMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -77,6 +102,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 ROOT_URLCONF = 'a_core.urls'
+PUBLIC_SCHEMA_URLCONF = 'a_core.urls_public'
 
 TEMPLATES = [
     {
@@ -103,7 +129,7 @@ WSGI_APPLICATION = 'a_core.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django_tenants.postgresql_backend',
         'NAME': 'postgres_v1',
         'USER': 'postgres',
         'PASSWORD': 'postgres',
@@ -112,6 +138,14 @@ DATABASES = {
     }
 }
 
+DATABASE_ROUTERS = [
+    'django_tenants.routers.TenantSyncRouter'
+]
+
+
+TENANT_MODEL = "a_tenant_manager.Tenant"
+TENANT_DOMAIN_MODEL = "a_tenant_manager.Domain"
+SHOW_PUBLIC_IF_NO_TENANT_FOUND = True
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
