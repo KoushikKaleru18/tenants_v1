@@ -44,6 +44,7 @@ SHARED_APPS = [
     'django.contrib.staticfiles',
     'django_cleanup.apps.CleanupConfig',
     'django_htmx',
+    'colorfield',
     'django.contrib.sites',
     'allauth',
     'allauth.account',
@@ -186,6 +187,23 @@ STATICFILES_DIRS = [ BASE_DIR / 'static' ]
 
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media' 
+
+MULTITENANT_RELATIVE_MEDIA_ROOT = "tenants/%s"
+
+# Tenant storage config
+
+STORAGES = {
+    "default": {
+        "BACKEND": "a_home.storage.CustomSchemaStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
+
+
+
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

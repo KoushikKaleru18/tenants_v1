@@ -225,3 +225,165 @@ and add these urls in `settings.py` under ROOT_URL_CONF
 ``` python
 PUBLIC_SCHEMA_URLCONF = 'a_core.urls_public'
 ```
+
+
+
+
+### Add colors to Navbar based on tenants
+
+- Install django-colorfield
+
+and add it in SHARED_APPS
+
+```
+python3 manage.py makemigrations
+
+python3 manage.py migrate_schemas
+```
+
+`migrate_schemas` command for migrating to all schemas.. it also have other options which we can use
+
+
+- to migrate only SHARED_APPS 
+ python3 manage.py migrate_schemas --shared
+
+ - to migrate only TENANT_APPS
+ python3 manage.py migrate_schemas --tenant
+
+ - to migrate to only a specific tenant
+ python3 manage.py migrate_schemas --schema=<tenant_name>
+
+ - to migrate all schemas migrations in parallel
+ python3 manage.py migrate_schemas --executor=parallel
+
+
+now we need to change the header color based on the tenant
+
+create a `templatetags` folder in a_home, and create 2 files
+1. __init__.py
+2. header.py
+``` python
+from django.template import Library
+from a_home.models import SiteSetting
+
+register = Library() 
+
+@register.inclusion_tag('includes/header.html') 
+def header_view(request):
+    branding = SiteSetting.objects.first()
+    if branding:
+        color = branding.color
+    else:
+        color = None
+ 
+    context = {
+        'request' : request,
+        'color' : color,
+    }
+    return context
+```
+
+
+and now replace where u r including header.html in base.html
+
+change
+    `{% include 'includes/header.html' %}`
+    to
+    ```
+    {% load header %}
+    {% header_view request %}
+    ```
+
+
+### To add logo for tenants
+
+in SiteSetting model add
+
+```
+logo = models.ImageField(upload_to="logo/", null=True, blank=True)
+```
+
+
+
+
+### Upload the files based on tenants - to its respective tenants 
+
+add Django Tenant Storage configuration which comes directly from Django Tenants package
+
+in `settings.py` :
+
+add this below MEDIA_ROOT
+
+``` python
+STORAGES = {
+    "default": {
+        "BACKEND": "django_tenants.files.storage.TenantFileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+```
+
+This works fine with new projects, but if u already have users, and want to map the already existing media with public domain, do:
+
+create `storage.py` in `a_home` app
+
+``` python
+from django.core.files.storage import FileSystemStorage
+from django.db import connection
+from django_tenants.files.storage import TenantFileSystemStorage
+
+
+class CustomSchemaStorage:
+    def _get_storage_backend(self):
+        schema_name = connection.schema_name
+
+        if schema_name == 'public':
+            return FileSystemStorage()
+        else:
+            return TenantFileSystemStorage()
+
+
+    def save(self, name, content, max_length=None):
+        storage_backend = self._get_storage_backend()
+        return storage_backend.save(name, content, max_length)
+
+    def url(self, name):
+        storage_backend = self._get_storage_backend()
+        return storage_backend.url(name)
+    
+    def generate_filename(self, name):
+        storage_backend = self._get_storage_backend()
+        return storage_backend.generate_filename(name)
+
+```
+
+
+after creating this, change 
+
+``` python
+STORAGES = {
+    "default": {
+        "BACKEND": "django_tenants.files.storage.TenantFileSystemStorage",
+    },
+    ...
+}
+```
+to 
+
+``` python
+STORAGES = {
+    "default": {
+        "BACKEND": "a_home.storage.CustomSchemaStorage",
+    },
+    ...
+}
+```
+
+
+and to move all the tenants' media into a tenant folder, add
+
+``` python
+MULTITENANT_RELATIVE_MEDIA_ROOT = "tenants/%s"
+```
