@@ -1,12 +1,13 @@
 from django.core.management.base import BaseCommand
-from django_tenants.utils import get_tenant_model, get_domain_model
+# from django_tenants.utils import get_tenant_model, get_domain_model
+from a_tenant_manager.models import Tenant, Domain
 
 class Command(BaseCommand):
     help = "Create initial tenants"
 
     def handle(self, *args, **kwargs):
-        Tenant = get_tenant_model()
-        Domain = get_domain_model()
+        # Tenant = get_tenant_model()
+        # Domain = get_domain_model()
 
         schema_name = "school"
         tenant_name = "School Tenant"
