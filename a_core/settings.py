@@ -93,8 +93,8 @@ MIDDLEWARE = [
     'allauth.account.middleware.AccountMiddleware',
     'django_htmx.middleware.HtmxMiddleware',
 ]
-if DEBUG:
-    MIDDLEWARE += ['django_browser_reload.middleware.BrowserReloadMiddleware']
+# if DEBUG:
+#     MIDDLEWARE += ['django_browser_reload.middleware.BrowserReloadMiddleware']
 
 
 AUTHENTICATION_BACKENDS = [
@@ -128,14 +128,29 @@ WSGI_APPLICATION = 'a_core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django_tenants.postgresql_backend',
+#         'NAME': 'postgres_v1',
+#         'USER': 'postgres',
+#         'PASSWORD': 'postgres',
+#         'HOST': 'localhost',
+#         'PORT': 5432,
+#     }
+# }
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django_tenants.postgresql_backend',
-        'NAME': 'postgres_v1',
+        'NAME': 'postgres',
         'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': 'localhost',
+        'PASSWORD': 'Kk 18#1999',
+        'HOST': 'db.rtkpfschkklqslpybpxp.supabase.co',
         'PORT': 5432,
+        'OPTIONS': {
+            'sslmode': 'require',
+        }
     }
 }
 
