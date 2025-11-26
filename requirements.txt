@@ -7,3 +7,4 @@ pillow==11.3.0
 django-tenants
 django-colorfield
 psycopg2-binary
+gunicorn==22.1.0
