@@ -10,7 +10,7 @@ class Command(BaseCommand):
 
         schema_name = "school"
         tenant_name = "School Tenant"
-        domain_name = "school.onrender.com"  # change this
+        domain_name = "school.tenants-v1.onrender.com"  # change this
 
         # Avoid duplicate tenants
         if Tenant.objects.filter(schema_name=schema_name).exists():
